@@ -114,7 +114,7 @@ public class PlayerListener implements Listener
 							World world = Bukkit.getWorld(worldName);
 							final Location location = new Location(world, x, y, z, yaw, pitch);
 							final World playerWorld = Bukkit.getWorld(player.getWorld().getName());
-							
+
 							final Entity entity = player.getVehicle();
 							if (entity != null)
 							{
@@ -126,7 +126,7 @@ public class PlayerListener implements Listener
 							{
 								if (player.getLevel() >= 2)
 								{
-									player.sendMessage(ChatColor.YELLOW + "Teleport will commence in " + crayHomes.timeBeforeTeleport + " second(s).");
+									player.sendMessage(ChatColor.YELLOW + "Teleport will commence in " + crayHomes.config.timeBeforeTeleport + " second(s).");
 									playerWorld.playSound(player.getLocation(), Sound.ENDERDRAGON_DEATH, 1.0F, 1.0F);
 									UUIDtoTask.put(player.getUniqueId(), player.getServer().getScheduler().scheduleSyncRepeatingTask(crayHomes, new Runnable()
 									{
@@ -136,7 +136,7 @@ public class PlayerListener implements Listener
 										@Override
 										public void run()
 										{
-											double percent = ((double) currentTime / (20 * (double) crayHomes.timeBeforeTeleport));
+											double percent = ((double) currentTime / (20 * (double) crayHomes.config.timeBeforeTeleport));
 											double amount = 20 * percent;
 											try
 											{
@@ -166,7 +166,7 @@ public class PlayerListener implements Listener
 											}
 										}
 
-									}, (20 * crayHomes.timeBeforeTeleport) - 2);
+									}, (20 * crayHomes.config.timeBeforeTeleport) - 2);
 								}
 								else
 								{
@@ -193,7 +193,7 @@ public class PlayerListener implements Listener
 											{
 												try
 												{
-													ParticleEffect.SMOKE_LARGE.display( 0, 0, 0, 0.1F, 50, player.getLocation(), 30);
+													ParticleEffect.SMOKE_LARGE.display(0, 0, 0, 0.1F, 50, player.getLocation(), 30);
 													playerWorld.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 												}
 												catch (Exception e)
@@ -205,7 +205,7 @@ public class PlayerListener implements Listener
 											player.getServer().getScheduler().cancelTask(UUIDtoTask.get(player.getUniqueId()));
 											UUIDtoTask.remove(player.getUniqueId());
 										}
-									}, 20 * crayHomes.timeBeforeTeleport);
+									}, 20 * crayHomes.config.timeBeforeTeleport);
 								}
 								else
 								{
@@ -218,7 +218,7 @@ public class PlayerListener implements Listener
 											{
 												try
 												{
-													ParticleEffect.SMOKE_LARGE.display( 0, 0, 0, 0.1F, 50, player.getLocation(), 30);
+													ParticleEffect.SMOKE_LARGE.display(0, 0, 0, 0.1F, 50, player.getLocation(), 30);
 													playerWorld.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 												}
 												catch (Exception e)
@@ -230,7 +230,7 @@ public class PlayerListener implements Listener
 											player.getServer().getScheduler().cancelTask(UUIDtoTask.get(player.getUniqueId()));
 											UUIDtoTask.remove(player.getUniqueId());
 										}
-									}, 20 * crayHomes.timeBeforeTeleport);
+									}, 20 * crayHomes.config.timeBeforeTeleport);
 								}
 							}
 							else
@@ -276,7 +276,7 @@ public class PlayerListener implements Listener
 			{
 				String homeName = inventory.getItem(slotNum).getItemMeta().getDisplayName();
 
-				if (player.getLevel() >= crayHomes.creationCost)
+				if (player.getLevel() >= crayHomes.config.creationCost)
 				{
 					if (CrayHomes.owners.containsKey(player.getUniqueId()))
 					{
@@ -309,11 +309,11 @@ public class PlayerListener implements Listener
 						CrayHomes.owners.get(player.getUniqueId()).add(new Home(player.getWorld().getName(), inventory.getItem(slotNum).getType().name(), homeName, player.getUniqueId(), player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ(), player.getLocation().getYaw(), player.getLocation().getPitch()));
 						player.sendMessage(ChatColor.GREEN + "Home created!");
 					}
-					player.setLevel(player.getLevel() - crayHomes.creationCost);
+					player.setLevel(player.getLevel() - crayHomes.config.creationCost);
 				}
 				else
 				{
-					player.sendMessage(ChatColor.RED + "You need at least " + crayHomes.creationCost + " experience level(s) to set a teleport location.");
+					player.sendMessage(ChatColor.RED + "You need at least " + crayHomes.config.creationCost + " experience level(s) to set a teleport location.");
 				}
 				player.closeInventory();
 			}
@@ -384,17 +384,17 @@ public class PlayerListener implements Listener
 
 	public boolean teleport(Location location, Player player)
 	{
-		if (player.getLevel() < crayHomes.teleportCost)
+		if (player.getLevel() < crayHomes.config.teleportCost)
 			return false;
-		player.setLevel(player.getLevel() - crayHomes.teleportCost);
+		player.setLevel(player.getLevel() - crayHomes.config.teleportCost);
 		return player.teleport(location);
 	}
 
 	public boolean teleport(Location location, Player player, Entity entity)
 	{
-		if (player.getLevel() < crayHomes.teleportCost)
+		if (player.getLevel() < crayHomes.config.teleportCost)
 			return false;
-		player.setLevel(player.getLevel() - crayHomes.teleportCost);
+		player.setLevel(player.getLevel() - crayHomes.config.teleportCost);
 		if (player.teleport(location))
 		{
 			entity.teleport(location);

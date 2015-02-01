@@ -27,7 +27,7 @@ public class CommandHome implements CommandExecutor
 			return true;
 		}
 
-		if (!plugin.useCompass)
+		if (!plugin.config.useCompass)
 		{
 			if (CrayHomes.perms.has((Player) sender, "crayhomes.use") | sender.isOp())
 			{
