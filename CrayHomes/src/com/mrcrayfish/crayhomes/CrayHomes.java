@@ -17,12 +17,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
+import com.mrcrayfish.crayhomes.commands.CommandHome;
+import com.mrcrayfish.crayhomes.listeners.PlayerListener;
+import com.mrcrayfish.crayhomes.main.Home;
+import com.mrcrayfish.crayhomes.main.Homes;
 
 public final class CrayHomes extends JavaPlugin
 {
-
 	public File homeDataFile;
 	public YamlConfiguration homeConfig;
 	public boolean useCompass = true;
@@ -31,7 +32,6 @@ public final class CrayHomes extends JavaPlugin
 	public int creationCost;
 	public static HashMap<UUID, Homes> owners = new HashMap<UUID, Homes>();
 	public static Permission perms = null;
-	public ProtocolManager protocolManager;
 
 	public Permission getPerm()
 	{
@@ -60,7 +60,6 @@ public final class CrayHomes extends JavaPlugin
 		}
 		saveConfig();
 
-		this.protocolManager = ProtocolLibrary.getProtocolManager();
 		this.useCompass = getConfig().getBoolean("useCompass");
 		this.timeBeforeTeleport = getConfig().getInt("timeBeforeTeleport");
 		this.teleportCost = getConfig().getInt("teleportCost");
@@ -90,7 +89,7 @@ public final class CrayHomes extends JavaPlugin
 
 	private void setupConfig()
 	{
-		homeDataFile = new File(getDataFolder(), "homeData.yml");
+		homeDataFile = new File(getDataFolder(), "home_data.yml");
 		if (!homeDataFile.exists())
 		{
 			homeDataFile.getParentFile().mkdirs();

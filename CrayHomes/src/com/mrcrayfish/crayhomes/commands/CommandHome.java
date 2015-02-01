@@ -1,10 +1,13 @@
-package com.mrcrayfish.crayhomes;
+package com.mrcrayfish.crayhomes.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import com.mrcrayfish.crayhomes.CrayHomes;
+import com.mrcrayfish.crayhomes.main.HomeGUI;
 
 public class CommandHome implements CommandExecutor
 {
@@ -29,7 +32,7 @@ public class CommandHome implements CommandExecutor
 			if (CrayHomes.perms.has((Player) sender, "crayhomes.use") | sender.isOp())
 			{
 				Player player = (Player) sender;
-				player.openInventory(HomeInventory.createHomeInventory(plugin, player));
+				player.openInventory(HomeGUI.createHomeInventory(plugin, player));
 				return true;
 			}
 			else

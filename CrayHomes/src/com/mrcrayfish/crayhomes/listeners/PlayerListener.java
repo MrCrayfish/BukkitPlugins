@@ -1,4 +1,4 @@
-package com.mrcrayfish.crayhomes;
+package com.mrcrayfish.crayhomes.listeners;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +25,12 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+
+import com.mrcrayfish.crayhomes.CrayHomes;
+import com.mrcrayfish.crayhomes.main.Home;
+import com.mrcrayfish.crayhomes.main.HomeGUI;
+import com.mrcrayfish.crayhomes.main.Homes;
+import com.mrcrayfish.crayhomes.util.ParticleEffect;
 
 public class PlayerListener implements Listener
 {
@@ -87,7 +93,7 @@ public class PlayerListener implements Listener
 				}
 				else if (slotNum == (inventory.getSize() - 1))
 				{
-					player.openInventory(HomeInventory.createDeleteHomeInventory(crayHomes, player));
+					player.openInventory(HomeGUI.createDeleteHomeInventory(crayHomes, player));
 				}
 				else if (slotNum >= 0 && slotNum <= homeCount)
 				{
@@ -241,7 +247,7 @@ public class PlayerListener implements Listener
 			event.setCancelled(true);
 			if (slotNum == (inventory.getSize() - 1))
 			{
-				player.openInventory(HomeInventory.createHomeInventory(crayHomes, player));
+				player.openInventory(HomeGUI.createHomeInventory(crayHomes, player));
 			}
 			else if (slotNum >= 0 && slotNum <= homeCount)
 			{
@@ -260,7 +266,7 @@ public class PlayerListener implements Listener
 					}
 				}
 
-				player.openInventory(HomeInventory.createDeleteHomeInventory(crayHomes, player));
+				player.openInventory(HomeGUI.createDeleteHomeInventory(crayHomes, player));
 			}
 		}
 		else if (inventory.getName().equals("Select Icon"))
@@ -326,7 +332,7 @@ public class PlayerListener implements Listener
 			{
 				if (getPending().get(i).equals(player.getUniqueId()))
 				{
-					player.openInventory(HomeInventory.createSetIconInventory(crayHomes, homeName));
+					player.openInventory(HomeGUI.createSetIconInventory(crayHomes, homeName));
 					player.sendMessage(ChatColor.GREEN + "Name set. Now select an icon.");
 					getPending().remove(i);
 					break;
@@ -365,7 +371,7 @@ public class PlayerListener implements Listener
 				{
 					if (crayHomes.getPerm().has(player, "crayhomes.use") | player.isOp())
 					{
-						player.openInventory(HomeInventory.createHomeInventory(crayHomes, player));
+						player.openInventory(HomeGUI.createHomeInventory(crayHomes, player));
 					}
 					else
 					{

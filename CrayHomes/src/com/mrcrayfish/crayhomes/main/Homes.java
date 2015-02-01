@@ -1,4 +1,4 @@
-package com.mrcrayfish.crayhomes;
+package com.mrcrayfish.crayhomes.main;
 
 import java.util.ArrayList;
 

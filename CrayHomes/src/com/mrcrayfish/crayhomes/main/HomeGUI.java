@@ -1,4 +1,4 @@
-package com.mrcrayfish.crayhomes;
+package com.mrcrayfish.crayhomes.main;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -8,9 +8,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class HomeInventory
-{
+import com.mrcrayfish.crayhomes.CrayHomes;
 
+public class HomeGUI
+{
 	private static Material[] blocks = { Material.GRASS, Material.DIRT, Material.STONE, Material.COBBLESTONE, Material.LOG, Material.WOOD, Material.GLASS, Material.BRICK, Material.BOOKSHELF, Material.OBSIDIAN, Material.NETHER_BRICK, Material.NETHERRACK, Material.COAL_BLOCK, Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.DIAMOND_BLOCK, Material.EMERALD_BLOCK, Material.HAY_BLOCK, Material.COAL_ORE, Material.IRON_ORE, Material.GOLD_ORE, Material.LAPIS_ORE, Material.DIAMOND_ORE,
 			Material.LEAVES, Material.WORKBENCH, Material.FURNACE, Material.CHEST, Material.REDSTONE_LAMP_OFF, Material.TNT, Material.PISTON_BASE, Material.JUKEBOX, Material.DISPENSER, Material.REDSTONE_BLOCK, Material.PACKED_ICE, Material.PUMPKIN, Material.MELON_BLOCK };
 

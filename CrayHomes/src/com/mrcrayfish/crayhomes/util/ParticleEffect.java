@@ -1,4 +1,4 @@
-package com.mrcrayfish.crayhomes;
+package com.mrcrayfish.crayhomes.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -15,7 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-import com.mrcrayfish.crayhomes.ReflectionUtils.PackageType;
+import com.mrcrayfish.crayhomes.util.ReflectionUtils.PackageType;
 
 /**
  * <b>ParticleEffect Library</b>

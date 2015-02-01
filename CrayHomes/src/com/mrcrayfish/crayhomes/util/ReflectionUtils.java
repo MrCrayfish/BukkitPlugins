@@ -1,4 +1,4 @@
-package com.mrcrayfish.crayhomes;
+package com.mrcrayfish.crayhomes.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
