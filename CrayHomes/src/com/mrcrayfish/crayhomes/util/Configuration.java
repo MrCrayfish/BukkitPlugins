@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
-import java.util.UUID;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -29,6 +28,7 @@ public class Configuration
 
 	/** Settings */
 	public boolean useCompass = true;
+	public boolean isBungeeCord = false;
 	public int timeBeforeTeleport;
 	public int teleportCost;
 	public int creationCost;
@@ -110,6 +110,18 @@ public class Configuration
 		{
 			configYaml.set("creationCost", 10);
 		}
+		if (!configYaml.contains("isBungeeCord"))
+		{
+			configYaml.set("isBungeeCord", false);
+		}
+		try
+		{
+			configYaml.save(configFile);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void loadConfig()
@@ -118,6 +130,7 @@ public class Configuration
 		this.timeBeforeTeleport = configYaml.getInt("timeBeforeTeleport");
 		this.teleportCost = configYaml.getInt("teleportCost");
 		this.creationCost = configYaml.getInt("creationCost");
+		this.isBungeeCord = configYaml.getBoolean("isBungeeCord");
 	}
 
 	private void copy(InputStream in, File file)
@@ -142,21 +155,24 @@ public class Configuration
 
 	public void loadHomeData()
 	{
-		Set<String> uuids = homeYaml.getConfigurationSection("homes").getKeys(false);
-		for (String uuid : uuids)
+		if (homeYaml.contains("homes"))
 		{
-			CrayHomes.owners.put(UUID.fromString(uuid), new Homes());
-			Set<String> homes = homeYaml.getConfigurationSection("homes." + uuid).getKeys(false);
-			for (String home : homes)
+			Set<String> uuids = homeYaml.getConfigurationSection("homes").getKeys(false);
+			for (String uuid : uuids)
 			{
-				String world = homeYaml.getString("homes." + uuid + "." + home + ".world");
-				String icon = homeYaml.getString("homes." + uuid + "." + home + ".icon");
-				int x = homeYaml.getInt("homes." + uuid + "." + home + ".x");
-				int y = homeYaml.getInt("homes." + uuid + "." + home + ".y");
-				int z = homeYaml.getInt("homes." + uuid + "." + home + ".z");
-				int yaw = homeYaml.getInt("homes." + uuid + "." + home + ".yaw");
-				int pitch = homeYaml.getInt("homes." + uuid + "." + home + ".pitch");
-				CrayHomes.owners.get(UUID.fromString(uuid)).add(new Home(world, icon, home, UUID.fromString(uuid), x, y, z, yaw, pitch));
+				CrayHomes.owners.put(uuid, new Homes());
+				Set<String> homes = homeYaml.getConfigurationSection("homes." + uuid).getKeys(false);
+				for (String home : homes)
+				{
+					String world = homeYaml.getString("homes." + uuid + "." + home + ".world");
+					String icon = homeYaml.getString("homes." + uuid + "." + home + ".icon");
+					int x = homeYaml.getInt("homes." + uuid + "." + home + ".x");
+					int y = homeYaml.getInt("homes." + uuid + "." + home + ".y");
+					int z = homeYaml.getInt("homes." + uuid + "." + home + ".z");
+					int yaw = homeYaml.getInt("homes." + uuid + "." + home + ".yaw");
+					int pitch = homeYaml.getInt("homes." + uuid + "." + home + ".pitch");
+					CrayHomes.owners.get(uuid).add(new Home(world, icon, home, uuid, x, y, z, yaw, pitch));
+				}
 			}
 		}
 	}

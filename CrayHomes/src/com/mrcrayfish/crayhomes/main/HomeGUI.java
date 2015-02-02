@@ -17,6 +17,15 @@ public class HomeGUI
 
 	public static Inventory createHomeInventory(CrayHomes crayHomes, Player player)
 	{
+		if (!CrayHomes.owners.containsKey(player.getUniqueId()))
+		{
+			CrayHomes.owners.put(player.getUniqueId().toString(), new Homes());
+		}
+		return createHomeInventory(crayHomes, player, CrayHomes.owners.get(player.getUniqueId().toString()));
+	}
+
+	public static Inventory createHomeInventory(CrayHomes crayHomes, Player player, Homes homes)
+	{
 		String newPlayerName = player.getName();
 		if (newPlayerName.length() >= 11)
 		{
@@ -25,123 +34,104 @@ public class HomeGUI
 		Inventory inventory = Bukkit.getServer().createInventory(null, 9, newPlayerName + "'s Homes " + ChatColor.GREEN + "[Teleport]");
 		int count = 0;
 
-		if (CrayHomes.owners.containsKey(player.getUniqueId()))
+		int rows = 1;
+		if (homes.size() > 7)
 		{
-			Homes homelist = CrayHomes.owners.get(player.getUniqueId());
-			int rows = 1;
-			if (homelist.size() > 7)
+			for (int i = 0; i < homes.size(); i++)
 			{
-				for (int i = 0; i < homelist.size(); i++)
+				if ((i + 2) % 9 == 0)
 				{
-					if ((i + 2) % 9 == 0)
-					{
-						rows++;
-					}
+					rows++;
 				}
 			}
-
-			int size = rows * 9;
-			if (size > 54)
-			{
-				size = 54;
-			}
-			inventory = Bukkit.getServer().createInventory(null, size, newPlayerName + "'s Homes " + ChatColor.GREEN + "[Teleport]");
-
-			for (Home home : homelist)
-			{
-				ItemStack homeItem = new ItemStack(Material.getMaterial(home.icon));
-				ItemMeta homeItemMeta = homeItem.getItemMeta();
-				homeItemMeta.setDisplayName(home.name);
-				homeItem.setItemMeta(homeItemMeta);
-				inventory.setItem(count, homeItem);
-				count++;
-			}
-
-			ItemStack setHomeItem = new ItemStack(Material.WOOL, 1, (byte) 5);
-			ItemMeta setHomeItemMeta = setHomeItem.getItemMeta();
-			setHomeItemMeta.setDisplayName("Set Home");
-			setHomeItem.setItemMeta(setHomeItemMeta);
-			inventory.setItem(size - 2, setHomeItem);
-
-			ItemStack delHomeItem = new ItemStack(Material.WOOL, 1, (byte) 14);
-			ItemMeta delHomeItemMeta = delHomeItem.getItemMeta();
-			delHomeItemMeta.setDisplayName("Delete Home");
-			delHomeItem.setItemMeta(delHomeItemMeta);
-			inventory.setItem(size - 1, delHomeItem);
 		}
-		else
+
+		int size = rows * 9;
+		if (size > 54)
 		{
-			ItemStack setHomeItem = new ItemStack(Material.WOOL, 1, (byte) 5);
-			ItemMeta setHomeItemMeta = setHomeItem.getItemMeta();
-			setHomeItemMeta.setDisplayName("Set Home");
-			setHomeItem.setItemMeta(setHomeItemMeta);
-			inventory.setItem(7, setHomeItem);
-
-			ItemStack delHomeItem = new ItemStack(Material.WOOL, 1, (byte) 14);
-			ItemMeta delHomeItemMeta = delHomeItem.getItemMeta();
-			delHomeItemMeta.setDisplayName("Delete Home");
-			delHomeItem.setItemMeta(delHomeItemMeta);
-			inventory.setItem(8, delHomeItem);
+			size = 54;
 		}
+		inventory = Bukkit.getServer().createInventory(null, size, newPlayerName + "'s Homes " + ChatColor.GREEN + "[Teleport]");
+
+		for (Home home : homes)
+		{
+			ItemStack homeItem = new ItemStack(Material.getMaterial(home.icon));
+			ItemMeta homeItemMeta = homeItem.getItemMeta();
+			homeItemMeta.setDisplayName(home.name);
+			homeItem.setItemMeta(homeItemMeta);
+			inventory.setItem(count, homeItem);
+			count++;
+		}
+
+		ItemStack setHomeItem = new ItemStack(Material.WOOL, 1, (byte) 5);
+		ItemMeta setHomeItemMeta = setHomeItem.getItemMeta();
+		setHomeItemMeta.setDisplayName("Set Home");
+		setHomeItem.setItemMeta(setHomeItemMeta);
+		inventory.setItem(size - 2, setHomeItem);
+
+		ItemStack delHomeItem = new ItemStack(Material.WOOL, 1, (byte) 14);
+		ItemMeta delHomeItemMeta = delHomeItem.getItemMeta();
+		delHomeItemMeta.setDisplayName("Delete Home");
+		delHomeItem.setItemMeta(delHomeItemMeta);
+		inventory.setItem(size - 1, delHomeItem);
+
 		return inventory;
 	}
 
 	public static Inventory createDeleteHomeInventory(CrayHomes crayHomes, Player player)
+	{
+		if (!CrayHomes.owners.containsKey(player.getUniqueId()))
+		{
+			CrayHomes.owners.put(player.getUniqueId().toString(), new Homes());
+		}
+		return createDeleteHomeInventory(crayHomes, player, CrayHomes.owners.get(player.getUniqueId().toString()));
+	}
+
+	public static Inventory createDeleteHomeInventory(CrayHomes crayHomes, Player player, Homes homes)
 	{
 		String newPlayerName = player.getName();
 		if (newPlayerName.length() >= 11)
 		{
 			newPlayerName = newPlayerName.substring(0, 11);
 		}
+
 		Inventory inventory = Bukkit.getServer().createInventory(null, 9, newPlayerName + "'s Homes " + ChatColor.RED + "[Delete]");
 		int count = 0;
-
-		if (CrayHomes.owners.containsKey(player.getUniqueId()))
+		int rows = 1;
+		if (homes.size() > 7)
 		{
-			Homes homelist = CrayHomes.owners.get(player.getUniqueId());
-			int rows = 1;
-			if (homelist.size() > 7)
+			for (int i = 0; i < homes.size(); i++)
 			{
-				for (int i = 0; i < homelist.size(); i++)
+				if ((i + 1) % 9 == 0)
 				{
-					if ((i + 1) % 9 == 0)
-					{
-						rows++;
-					}
+					rows++;
 				}
 			}
-
-			int size = rows * 9;
-			if (size > 54)
-			{
-				size = 54;
-			}
-			inventory = Bukkit.getServer().createInventory(null, size, newPlayerName + "'s Homes " + ChatColor.RED + "[Delete]");
-
-			for (Home home : homelist)
-			{
-				ItemStack homeItem = new ItemStack(Material.getMaterial(home.icon));
-				ItemMeta homeItemMeta = homeItem.getItemMeta();
-				homeItemMeta.setDisplayName(home.name);
-				homeItem.setItemMeta(homeItemMeta);
-				inventory.setItem(count, homeItem);
-				count++;
-			}
-
-			ItemStack delHomeItem = new ItemStack(Material.WOOL, 1, (byte) 14);
-			ItemMeta delHomeItemMeta = delHomeItem.getItemMeta();
-			delHomeItemMeta.setDisplayName("Back");
-			delHomeItem.setItemMeta(delHomeItemMeta);
-			inventory.setItem(size - 1, delHomeItem);
 		}
-		else
+
+		int size = rows * 9;
+		if (size > 54)
 		{
-			ItemStack delHomeItem = new ItemStack(Material.WOOL, 1, (byte) 14);
-			ItemMeta delHomeItemMeta = delHomeItem.getItemMeta();
-			delHomeItemMeta.setDisplayName("Back");
-			delHomeItem.setItemMeta(delHomeItemMeta);
-			inventory.setItem(8, delHomeItem);
+			size = 54;
 		}
+		inventory = Bukkit.getServer().createInventory(null, size, newPlayerName + "'s Homes " + ChatColor.RED + "[Delete]");
+
+		for (Home home : homes)
+		{
+			ItemStack homeItem = new ItemStack(Material.getMaterial(home.icon));
+			ItemMeta homeItemMeta = homeItem.getItemMeta();
+			homeItemMeta.setDisplayName(home.name);
+			homeItem.setItemMeta(homeItemMeta);
+			inventory.setItem(count, homeItem);
+			count++;
+		}
+
+		ItemStack delHomeItem = new ItemStack(Material.WOOL, 1, (byte) 14);
+		ItemMeta delHomeItemMeta = delHomeItem.getItemMeta();
+		delHomeItemMeta.setDisplayName("Back");
+		delHomeItem.setItemMeta(delHomeItemMeta);
+		inventory.setItem(size - 1, delHomeItem);
+		
 		return inventory;
 	}
 

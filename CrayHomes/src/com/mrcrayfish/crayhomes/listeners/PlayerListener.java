@@ -27,17 +27,21 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 
 import com.mrcrayfish.crayhomes.CrayHomes;
+import com.mrcrayfish.crayhomes.HomeManager;
+import com.mrcrayfish.crayhomes.TeleportHandler;
 import com.mrcrayfish.crayhomes.main.Home;
 import com.mrcrayfish.crayhomes.main.HomeGUI;
 import com.mrcrayfish.crayhomes.main.Homes;
+import com.mrcrayfish.crayhomes.tasks.teleport.TeleportTask;
+import com.mrcrayfish.crayhomes.tasks.teleport.TeleportWithEntityTask;
 import com.mrcrayfish.crayhomes.util.ParticleEffect;
 
 public class PlayerListener implements Listener
 {
 	private CrayHomes crayHomes;
 	private ArrayList<UUID> namePendingList = new ArrayList<UUID>();
-	private Map<UUID, Integer> UUIDtoTask = new HashMap<UUID, Integer>();
-	private Random rand = new Random();
+	private static Map<UUID, Integer> UUIDtoTask = new HashMap<UUID, Integer>();
+	private static Random rand = new Random();
 
 	private synchronized ArrayList<UUID> getPending()
 	{
@@ -74,7 +78,7 @@ public class PlayerListener implements Listener
 		int homeCount = 0;
 		if (CrayHomes.owners.containsKey(player.getUniqueId()))
 		{
-			homeCount = CrayHomes.owners.get(player.getUniqueId()).size();
+			homeCount = CrayHomes.owners.get(player.getUniqueId().toString()).size();
 		}
 
 		if (inventory.getName().equals(newPlayerName + "'s Homes " + ChatColor.GREEN + "[Teleport]"))
@@ -93,150 +97,28 @@ public class PlayerListener implements Listener
 				}
 				else if (slotNum == (inventory.getSize() - 1))
 				{
-					player.openInventory(HomeGUI.createDeleteHomeInventory(crayHomes, player));
+					if (crayHomes.config.isBungeeCord)
+					{
+						HomeManager.openDeleteGui(player);
+					}
+					else
+					{
+						player.openInventory(HomeGUI.createDeleteHomeInventory(crayHomes, player));
+					}
 				}
 				else if (slotNum >= 0 && slotNum <= homeCount)
 				{
 					if (inventory.getItem(slotNum) != null)
 					{
-						String homeName = inventory.getItem(slotNum).getItemMeta().getDisplayName();
-						Home home = CrayHomes.owners.get(player.getUniqueId()).getHome(homeName);
-						if (home != null)
+						final String homeName = inventory.getItem(slotNum).getItemMeta().getDisplayName();
+						if (crayHomes.config.isBungeeCord)
 						{
-							player.closeInventory();
-
-							double x = home.x + 0.5D;
-							double y = home.y;
-							double z = home.z + 0.5D;
-							float pitch = home.pitch;
-							float yaw = home.yaw;
-							String worldName = home.world;
-							World world = Bukkit.getWorld(worldName);
-							final Location location = new Location(world, x, y, z, yaw, pitch);
-							final World playerWorld = Bukkit.getWorld(player.getWorld().getName());
-
-							final Entity entity = player.getVehicle();
-							if (entity != null)
-							{
-								entity.eject();
-							}
-
-							boolean loaded = world.getChunkAt(location).load();
-							if (loaded)
-							{
-								if (player.getLevel() >= 2)
-								{
-									player.sendMessage(ChatColor.YELLOW + "Teleport will commence in " + crayHomes.config.timeBeforeTeleport + " second(s).");
-									playerWorld.playSound(player.getLocation(), Sound.ENDERDRAGON_DEATH, 1.0F, 1.0F);
-									UUIDtoTask.put(player.getUniqueId(), player.getServer().getScheduler().scheduleSyncRepeatingTask(crayHomes, new Runnable()
-									{
-
-										private int currentTime = 1;
-
-										@Override
-										public void run()
-										{
-											double percent = ((double) currentTime / (20 * (double) crayHomes.config.timeBeforeTeleport));
-											double amount = 20 * percent;
-											try
-											{
-												ParticleEffect.CRIT_MAGIC.display(0, rand.nextFloat(), 0, 1, (int) amount, player.getLocation(), 30);
-											}
-											catch (Exception e)
-											{
-												e.printStackTrace();
-											}
-											currentTime++;
-										}
-									}, 0, 1));
-									player.getServer().getScheduler().scheduleSyncDelayedTask(crayHomes, new Runnable()
-									{
-
-										@Override
-										public void run()
-										{
-											try
-											{
-												ParticleEffect.SMOKE_LARGE.display(0, rand.nextFloat(), 0, 0.1F, 50, player.getLocation(), 30);
-												playerWorld.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-											}
-											catch (Exception e)
-											{
-												e.printStackTrace();
-											}
-										}
-
-									}, (20 * crayHomes.config.timeBeforeTeleport) - 2);
-								}
-								else
-								{
-									player.sendMessage(ChatColor.RED + "You need at least 2 experience levels to teleport.");
-								}
-								if (entity != null)
-								{
-									player.getServer().getScheduler().scheduleSyncDelayedTask(crayHomes, new Runnable()
-									{
-										@Override
-										public void run()
-										{
-											boolean teleported = false;
-											player.sendMessage("Sending Packet");
-											if (!entity.getType().name().equals("BOAT") || !entity.getType().name().equals("MINECART"))
-											{
-												teleported = teleport(location, player, entity);
-											}
-											else
-											{
-												teleported = teleport(location, player);
-											}
-											if (teleported)
-											{
-												try
-												{
-													ParticleEffect.SMOKE_LARGE.display(0, 0, 0, 0.1F, 50, player.getLocation(), 30);
-													playerWorld.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-												}
-												catch (Exception e)
-												{
-													e.printStackTrace();
-												}
-												player.sendMessage(ChatColor.GREEN + "Wooooosh!");
-											}
-											player.getServer().getScheduler().cancelTask(UUIDtoTask.get(player.getUniqueId()));
-											UUIDtoTask.remove(player.getUniqueId());
-										}
-									}, 20 * crayHomes.config.timeBeforeTeleport);
-								}
-								else
-								{
-									player.getServer().getScheduler().scheduleSyncDelayedTask(crayHomes, new Runnable()
-									{
-										@Override
-										public void run()
-										{
-											if (teleport(location, player))
-											{
-												try
-												{
-													ParticleEffect.SMOKE_LARGE.display(0, 0, 0, 0.1F, 50, player.getLocation(), 30);
-													playerWorld.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-												}
-												catch (Exception e)
-												{
-													e.printStackTrace();
-												}
-												player.sendMessage(ChatColor.GREEN + "Wooooosh!");
-											}
-											player.getServer().getScheduler().cancelTask(UUIDtoTask.get(player.getUniqueId()));
-											UUIDtoTask.remove(player.getUniqueId());
-										}
-									}, 20 * crayHomes.config.timeBeforeTeleport);
-								}
-							}
-							else
-							{
-								player.sendMessage(ChatColor.RED + "Teleport could not be completed as chunk did not load correctly. Please try again.");
-							}
+							HomeManager.teleportPlayerToHome(player, homeName);
+						}
+						else
+						{
+							Home home = CrayHomes.owners.get(player.getUniqueId().toString()).getHome(homeName);
+							handleTeleport(player, home);
 						}
 					}
 				}
@@ -247,26 +129,47 @@ public class PlayerListener implements Listener
 			event.setCancelled(true);
 			if (slotNum == (inventory.getSize() - 1))
 			{
-				player.openInventory(HomeGUI.createHomeInventory(crayHomes, player));
+				if (crayHomes.config.isBungeeCord)
+				{
+					HomeManager.openHomeGui(player);
+				}
+				else
+				{
+					player.openInventory(HomeGUI.createHomeInventory(crayHomes, player));
+				}
 			}
 			else if (slotNum >= 0 && slotNum <= homeCount)
 			{
 				if (inventory.getItem(slotNum) != null)
 				{
 					String homeName = inventory.getItem(slotNum).getItemMeta().getDisplayName();
-					Homes homeList = CrayHomes.owners.get(player.getUniqueId());
-					if (homeList != null)
+					if (crayHomes.config.isBungeeCord)
 					{
-						Home home = homeList.getHome(homeName);
-						if (home != null)
+						HomeManager.deleteHome(player, homeName);
+					}
+					else
+					{
+						Homes homeList = CrayHomes.owners.get(player.getUniqueId().toString());
+						if (homeList != null)
 						{
-							homeList.remove(home);
-							player.sendMessage(ChatColor.GREEN + "Home deleted!");
+							Home home = homeList.getHome(homeName);
+							if (home != null)
+							{
+								homeList.remove(home);
+								player.sendMessage(ChatColor.GREEN + "Home deleted!");
+							}
 						}
 					}
 				}
 
-				player.openInventory(HomeGUI.createDeleteHomeInventory(crayHomes, player));
+				if (crayHomes.config.isBungeeCord)
+				{
+					HomeManager.openDeleteGui(player);
+				}
+				else
+				{
+					player.openInventory(HomeGUI.createDeleteHomeInventory(crayHomes, player));
+				}
 			}
 		}
 		else if (inventory.getName().equals("Select Icon"))
@@ -280,7 +183,7 @@ public class PlayerListener implements Listener
 				{
 					if (CrayHomes.owners.containsKey(player.getUniqueId()))
 					{
-						Homes homelist = CrayHomes.owners.get(player.getUniqueId());
+						Homes homelist = CrayHomes.owners.get(player.getUniqueId().toString());
 
 						int homeLimit = 1;
 
@@ -294,7 +197,15 @@ public class PlayerListener implements Listener
 
 						if (homelist.size() < homeLimit)
 						{
-							homelist.add(new Home(player.getWorld().getName(), inventory.getItem(slotNum).getType().name(), homeName, player.getUniqueId(), player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ(), player.getLocation().getYaw(), player.getLocation().getPitch()));
+							if (crayHomes.config.isBungeeCord)
+							{
+								HomeManager.setHome(player, homeName, inventory.getItem(slotNum).getType().name());
+							}
+							else
+							{
+								Home home = new Home(player.getWorld().getName(), inventory.getItem(slotNum).getType().name(), homeName, player.getUniqueId().toString(), player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
+								homelist.add(home);
+							}
 							player.sendMessage(ChatColor.GREEN + "Home created!");
 							player.closeInventory();
 						}
@@ -305,9 +216,18 @@ public class PlayerListener implements Listener
 					}
 					else
 					{
-						CrayHomes.owners.put(player.getUniqueId(), new Homes());
-						CrayHomes.owners.get(player.getUniqueId()).add(new Home(player.getWorld().getName(), inventory.getItem(slotNum).getType().name(), homeName, player.getUniqueId(), player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ(), player.getLocation().getYaw(), player.getLocation().getPitch()));
+						if (crayHomes.config.isBungeeCord)
+						{
+							HomeManager.setHome(player, homeName, inventory.getItem(slotNum).getType().name());
+						}
+						else
+						{
+							CrayHomes.owners.put(player.getUniqueId().toString(), new Homes());
+							Home home = new Home(player.getWorld().getName(), inventory.getItem(slotNum).getType().name(), homeName, player.getUniqueId().toString(), player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
+							CrayHomes.owners.get(player.getUniqueId().toString()).add(home);
+						}
 						player.sendMessage(ChatColor.GREEN + "Home created!");
+						player.closeInventory();
 					}
 					player.setLevel(player.getLevel() - crayHomes.config.creationCost);
 				}
@@ -369,32 +289,83 @@ public class PlayerListener implements Listener
 				event.setCancelled(true);
 				if (event.getAction() == Action.RIGHT_CLICK_AIR | event.getAction() == Action.RIGHT_CLICK_BLOCK)
 				{
-					if (crayHomes.getPerm().has(player, "crayhomes.use") | player.isOp())
+					if (crayHomes.config.isBungeeCord)
 					{
-						player.openInventory(HomeGUI.createHomeInventory(crayHomes, player));
+						HomeManager.openHomeGui(player);
 					}
 					else
 					{
-						player.sendMessage(ChatColor.RED + "You do not have permission to use CrayHomes.");
+						if (crayHomes.getPerm().has(player, "crayhomes.use") | player.isOp())
+						{
+							player.openInventory(HomeGUI.createHomeInventory(crayHomes, player));
+						}
+						else
+						{
+							player.sendMessage(ChatColor.RED + "You do not have permission to use CrayHomes.");
+						}
 					}
 				}
 			}
 		}
 	}
 
-	public boolean teleport(Location location, Player player)
+	public static void handleTeleport(final Player player, Home home)
 	{
-		if (player.getLevel() < crayHomes.config.teleportCost)
-			return false;
-		player.setLevel(player.getLevel() - crayHomes.config.teleportCost);
-		return player.teleport(location);
+		if (home != null)
+		{
+			player.closeInventory();
+
+			double x = home.x + 0.5D;
+			double y = home.y;
+			double z = home.z + 0.5D;
+
+			float pitch = home.pitch;
+			float yaw = home.yaw;
+
+			String worldName = home.world;
+			World world = Bukkit.getWorld(worldName);
+
+			final Location location = new Location(world, x, y, z, yaw, pitch);
+			final World playerWorld = Bukkit.getWorld(player.getWorld().getName());
+
+			final Entity entity = player.getVehicle();
+			if (entity != null)
+			{
+				entity.eject();
+			}
+
+			TeleportHandler.startTeleport(player, location);
+			if (entity != null)
+			{
+				if (CrayHomes.instance.config.isBungeeCord)
+				{
+					HomeManager.teleportPlayerToHome(player, "");
+				}
+				else
+				{
+					player.getServer().getScheduler().scheduleSyncDelayedTask(CrayHomes.instance, new TeleportWithEntityTask(player, entity), 20 * CrayHomes.instance.config.timeBeforeTeleport);
+				}
+			}
+			else
+			{
+				if (CrayHomes.instance.config.isBungeeCord)
+				{
+
+				}
+				else
+				{
+					player.getServer().getScheduler().scheduleSyncDelayedTask(CrayHomes.instance, new TeleportTask(player), 20 * CrayHomes.instance.config.timeBeforeTeleport);
+				}
+			}
+		}
+
 	}
 
-	public boolean teleport(Location location, Player player, Entity entity)
+	private static boolean teleport(Location location, Player player, Entity entity)
 	{
-		if (player.getLevel() < crayHomes.config.teleportCost)
+		if (player.getLevel() < CrayHomes.instance.config.teleportCost)
 			return false;
-		player.setLevel(player.getLevel() - crayHomes.config.teleportCost);
+		player.setLevel(player.getLevel() - CrayHomes.instance.config.teleportCost);
 		if (player.teleport(location))
 		{
 			entity.teleport(location);
