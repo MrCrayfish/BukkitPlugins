@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import com.mrcrayfish.crayhomes.CrayHomes;
+import com.mrcrayfish.crayhomes.TeleportHandler;
 import com.mrcrayfish.crayhomes.main.Home;
 import com.mrcrayfish.crayhomes.main.HomeGUI;
 import com.mrcrayfish.crayhomes.main.Homes;
@@ -71,22 +72,12 @@ public class MessageListener implements PluginMessageListener
 				newPlayer.openInventory(HomeGUI.createDeleteHomeInventory(plugin, newPlayer, homes));
 			}
 
-			if (subChannel.equalsIgnoreCase("PreTeleportToHome"))
-			{
-				String world = in.readUTF();
-				int x = in.readInt();
-				int y = in.readInt();
-				int z = in.readInt();
-				float yaw = in.readFloat();
-				float pitch = in.readFloat();
-				Home home = new Home(world, null, null, uuid, x, y, z, yaw, pitch);
-				Player newPlayer = Bukkit.getPlayer(UUID.fromString(uuid));
-				PlayerListener.handleTeleport(newPlayer, home);
-			}
-			
 			if (subChannel.equalsIgnoreCase("TeleportToHome"))
 			{
-				
+				Home home = new Home(in.readUTF(), null, null, uuid, in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.readFloat());
+				Player newPlayer = Bukkit.getPlayer(UUID.fromString(uuid));
+				TeleportHandler.pendingTeleport.put(uuid, home.getLocation());
+				TeleportHandler.commenceTeleport(newPlayer, false, 0);
 			}
 		}
 		catch (IOException e)

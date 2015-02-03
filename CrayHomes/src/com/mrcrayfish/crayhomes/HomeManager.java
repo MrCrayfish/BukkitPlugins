@@ -53,7 +53,7 @@ public class HomeManager
 		new PluginMessageTask(player, b).runTaskAsynchronously(CrayHomes.instance);
 	}
 	
-	public static void teleportPlayerToHome(Player player, String home_name)
+	public static void delayTeleportToHome(Player player, String home_name)
 	{
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(b);
@@ -67,7 +67,7 @@ public class HomeManager
 		{
 			e.printStackTrace();
 		}
-		new PluginMessageTask(player, b).runTaskAsynchronously(CrayHomes.instance);
+		new PluginMessageTask(player, b).runTaskLaterAsynchronously(CrayHomes.instance, 20 * CrayHomes.instance.config.timeBeforeTeleport);
 	}
 	
 	public static void openHomeGui(Player player)

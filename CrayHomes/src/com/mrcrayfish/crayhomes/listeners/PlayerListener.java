@@ -1,18 +1,10 @@
 package com.mrcrayfish.crayhomes.listeners;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,16 +24,11 @@ import com.mrcrayfish.crayhomes.TeleportHandler;
 import com.mrcrayfish.crayhomes.main.Home;
 import com.mrcrayfish.crayhomes.main.HomeGUI;
 import com.mrcrayfish.crayhomes.main.Homes;
-import com.mrcrayfish.crayhomes.tasks.teleport.TeleportTask;
-import com.mrcrayfish.crayhomes.tasks.teleport.TeleportWithEntityTask;
-import com.mrcrayfish.crayhomes.util.ParticleEffect;
 
 public class PlayerListener implements Listener
 {
 	private CrayHomes crayHomes;
 	private ArrayList<UUID> namePendingList = new ArrayList<UUID>();
-	private static Map<UUID, Integer> UUIDtoTask = new HashMap<UUID, Integer>();
-	private static Random rand = new Random();
 
 	private synchronized ArrayList<UUID> getPending()
 	{
@@ -111,14 +98,26 @@ public class PlayerListener implements Listener
 					if (inventory.getItem(slotNum) != null)
 					{
 						final String homeName = inventory.getItem(slotNum).getItemMeta().getDisplayName();
-						if (crayHomes.config.isBungeeCord)
+						if (TeleportHandler.hasEnoughXP(player))
 						{
-							HomeManager.teleportPlayerToHome(player, homeName);
+							player.closeInventory();
+							if (crayHomes.config.isBungeeCord)
+							{
+								HomeManager.delayTeleportToHome(player, homeName);
+								player.sendMessage(ChatColor.YELLOW + "Teleport will commence in " + CrayHomes.instance.config.timeBeforeTeleport + " second(s).");
+								TeleportHandler.displayEffects(player);
+							}
+							else
+							{
+								Home home = CrayHomes.owners.get(player.getUniqueId().toString()).getHome(homeName);
+								player.sendMessage(ChatColor.YELLOW + "Teleport will commence in " + CrayHomes.instance.config.timeBeforeTeleport + " second(s).");
+								TeleportHandler.pendingTeleport.put(player.getUniqueId().toString(), home.getLocation());
+								TeleportHandler.commenceTeleport(player);
+							}
 						}
 						else
 						{
-							Home home = CrayHomes.owners.get(player.getUniqueId().toString()).getHome(homeName);
-							handleTeleport(player, home);
+							player.sendMessage(ChatColor.RED + "You need at least " + crayHomes.config.teleportCost + " experience levels to teleport.");
 						}
 					}
 				}
@@ -307,71 +306,5 @@ public class PlayerListener implements Listener
 				}
 			}
 		}
-	}
-
-	public static void handleTeleport(final Player player, Home home)
-	{
-		if (home != null)
-		{
-			player.closeInventory();
-
-			double x = home.x + 0.5D;
-			double y = home.y;
-			double z = home.z + 0.5D;
-
-			float pitch = home.pitch;
-			float yaw = home.yaw;
-
-			String worldName = home.world;
-			World world = Bukkit.getWorld(worldName);
-
-			final Location location = new Location(world, x, y, z, yaw, pitch);
-			final World playerWorld = Bukkit.getWorld(player.getWorld().getName());
-
-			final Entity entity = player.getVehicle();
-			if (entity != null)
-			{
-				entity.eject();
-			}
-
-			TeleportHandler.startTeleport(player, location);
-			if (entity != null)
-			{
-				if (CrayHomes.instance.config.isBungeeCord)
-				{
-					HomeManager.teleportPlayerToHome(player, "");
-				}
-				else
-				{
-					player.getServer().getScheduler().scheduleSyncDelayedTask(CrayHomes.instance, new TeleportWithEntityTask(player, entity), 20 * CrayHomes.instance.config.timeBeforeTeleport);
-				}
-			}
-			else
-			{
-				if (CrayHomes.instance.config.isBungeeCord)
-				{
-
-				}
-				else
-				{
-					player.getServer().getScheduler().scheduleSyncDelayedTask(CrayHomes.instance, new TeleportTask(player), 20 * CrayHomes.instance.config.timeBeforeTeleport);
-				}
-			}
-		}
-
-	}
-
-	private static boolean teleport(Location location, Player player, Entity entity)
-	{
-		if (player.getLevel() < CrayHomes.instance.config.teleportCost)
-			return false;
-		player.setLevel(player.getLevel() - CrayHomes.instance.config.teleportCost);
-		if (player.teleport(location))
-		{
-			entity.teleport(location);
-			entity.setPassenger(player);
-			return true;
-		}
-		return false;
 	}
 }

@@ -25,6 +25,7 @@ public class EffectWooshTask implements Runnable
 		{
 			ParticleEffect.SMOKE_LARGE.display(0, rand.nextFloat(), 0, 0.1F, 50, player.getLocation(), 30);
 			player.getWorld().playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+			
 		}
 		catch (Exception e)
 		{

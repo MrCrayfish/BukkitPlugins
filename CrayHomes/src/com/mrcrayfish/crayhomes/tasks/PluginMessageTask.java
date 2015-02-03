@@ -20,7 +20,6 @@ public class PluginMessageTask extends BukkitRunnable
 
 	public void run()
 	{
-		System.out.println("Sending Message");
 		player.sendPluginMessage(CrayHomes.instance, CrayHomes.OUTGOING_PLUGIN_CHANNEL, this.bytes.toByteArray());
 	}
 }

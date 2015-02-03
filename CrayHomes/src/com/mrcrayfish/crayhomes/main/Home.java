@@ -1,8 +1,10 @@
 package com.mrcrayfish.crayhomes.main;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+
 public class Home
 {
-	public String server;
 	public String world;
 	public String name;
 	public String icon;
@@ -29,8 +31,8 @@ public class Home
 		this.pitch = pitch;
 	}
 	
-	public void setServer(String string)
+	public Location getLocation()
 	{
-		this.server = string;
+		return new Location(Bukkit.getWorld(world), x + 0.5, y, z + 0.5, yaw, pitch);
 	}
 }

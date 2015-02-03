@@ -29,7 +29,7 @@ public class TeleportWithEntityTask implements Runnable
 		if (loaded)
 		{
 			boolean teleported = false;
-			if (!entity.getType().name().equals("BOAT") || !entity.getType().name().equals("MINECART"))
+			if (!entity.getType().name().equals("BOAT") || !entity.getType().name().equals("MINECART") && !CrayHomes.instance.config.isBungeeCord)
 			{
 				teleported = teleport(homeLoc, player, entity);
 			}
@@ -57,7 +57,6 @@ public class TeleportWithEntityTask implements Runnable
 			player.sendMessage(ChatColor.RED + "Teleport could not be completed as chunk did not load correctly. Please try again.");
 		}
 		TeleportHandler.pendingTeleport.remove(player.getUniqueId().toString());
-		
 	}
 
 	private static boolean teleport(Location location, Player player)
