@@ -42,8 +42,11 @@ public class SimpleChatFormatter extends JavaPlugin implements Listener {
 	public void onDisable() {
 		for (String uuid : usernameFormatting.keySet()) {
 			FormatEntry formatting = usernameFormatting.get(uuid);
-			getConfig().set("players." + uuid.toString() + ".colour", formatting.getColour().name());
-			getConfig().set("players." + uuid.toString() + ".style", formatting.getStyle().name());
+			
+			if(formatting != null) {
+			    getConfig().set("players." + uuid.toString() + ".colour", formatting.getColour().name());
+			    getConfig().set("players." + uuid.toString() + ".style", formatting.getStyle().name());
+			}
 		}
 		saveConfig();
 		usernameFormatting.clear();
@@ -54,12 +57,17 @@ public class SimpleChatFormatter extends JavaPlugin implements Listener {
 		String copy = format;
 		String uuid = event.getPlayer().getUniqueId().toString();
 		String playerName;
+		
 		if (usernameFormatting.containsKey(uuid)) {
 			FormatEntry entry = usernameFormatting.get(uuid);
-			playerName = entry.getColour() + "" + (entry.getStyle() == ChatColor.RESET ? "" : entry.getStyle()) + event.getPlayer().getDisplayName();
+			
+			if(entry != null) {
+			    playerName = entry.getColour() + "" + (entry.getStyle() == ChatColor.RESET ? "" : entry.getStyle()) + event.getPlayer().getDisplayName();	
+			}
 		} else {
 			playerName = event.getPlayer().getDisplayName();
 		}
+		
 		System.out.println(copy);
 		System.out.println(playerName);
 		copy = copy.replaceAll("<player>", playerName);
@@ -76,11 +84,14 @@ public class SimpleChatFormatter extends JavaPlugin implements Listener {
 		for (ChatColor format : ChatColor.values()) {
 			string = string.replaceAll("<" + format.name() + ">", "" + format);
 		}
+		
 		return string;
 	}
 
 	public ChatColor getUsernameColour(UUID uuid) {
-		return usernameFormatting.get(uuid.toString()).getColour();
+		FormatEntry entry = usernameFormatting.get(uuid.toString());
+	
+		return (entry != null ? entry.getColour() : null);
 	}
 
 	public void setUsernameColour(UUID uuid, ChatColor colour) {
@@ -89,7 +100,9 @@ public class SimpleChatFormatter extends JavaPlugin implements Listener {
 	}
 
 	public ChatColor getUsernameStyle(UUID uuid) {
-		return usernameFormatting.get(uuid.toString()).getStyle();
+		FormatEntry entry = usernameFormatting.get(uuid.toString());
+	
+		return (entry != null ? entry.getStyle() : null);
 	}
 
 	public void setUsernameStyle(UUID uuid, ChatColor style) {
@@ -98,47 +111,35 @@ public class SimpleChatFormatter extends JavaPlugin implements Listener {
 	}
 
 	public FormatEntry init(UUID uuid) {
-		if (!usernameFormatting.containsKey(uuid.toString())) {
-			usernameFormatting.put(uuid.toString(), new FormatEntry(ChatColor.WHITE, ChatColor.RESET));
-		}
-		return usernameFormatting.get(uuid.toString());
+		FormatEntry entry = usernameFormatting.get(uuid.toString());
+	
+		usernameFormatting.putIfAbsent(uuid.toString(), new FormatEntry(ChatColor.WHITE, ChatColor.RESET));
+		return (entry != null ? entry : null);
 	}
 
 	public ChatColor getColour(String col) {
-		for (ChatColor colour : ChatColor.values())
-			if (!isStyle(colour)) {
-				if (colour.name().equalsIgnoreCase(col)) {
-					return colour;
-				}
-			}
-		return null;
+		for (ChatColor colour : ChatColor.values()) {
+			return (!isStyle(colour) ? (colour.name().equalsIgnoreCase(col) : null) : null);
+		}
 	}
 
 	public ChatColor getStyle(String col) {
 		for (ChatColor colour : ChatColor.values()) {
-			if (isStyle(colour)) {
-				if (colour.name().equalsIgnoreCase(col)) {
-					return colour;
-				}
-			}
+			return (isStyle(colour) ? (colour.name().equalsIgnoreCase(col) : null) : null);
 		}
-		return null;
 	}
 
 	public boolean isStyle(ChatColor colour) {
-		if (colour == ChatColor.BOLD)
-			return true;
-		if (colour == ChatColor.ITALIC)
-			return true;
-		if (colour == ChatColor.STRIKETHROUGH)
-			return true;
-		if (colour == ChatColor.UNDERLINE)
-			return true;
-		if (colour == ChatColor.MAGIC)
-			return true;
-		if (colour == ChatColor.RESET)
-			return true;
-		return false;
-
+		switch(colour) {
+		    case ChatColor.BOLD:
+		    case ChatColor.ITALIC:
+		    case ChatColor.STRIKETHROUGH:
+		    case ChatColor.UNDERLINE:
+		    case ChatColor.MAGIC:
+		    case ChatColor.RESET:
+		    	return true;
+		    default:
+		    	return false;
+		}
 	}
 }
